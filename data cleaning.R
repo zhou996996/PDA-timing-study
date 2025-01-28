@@ -1,8 +1,7 @@
 if (!require("pacman")) install.packages("pacman"); library(pacman) 
-p_load(skimr, tidyr, dplyr, lubridate, knitr, ggplot2, survival, tableone, here, survminer,ggsurvfit,xtable,splines,testthat,survey) ## added lubridate for year function
+p_load(skimr, tidyr, dplyr, lubridate, knitr, ggplot2, survival, tableone, here, survminer,ggsurvfit,xtable,splines,testthat,survey) 
 
-################################Start of the analysis########################################
-###data cleaning
+
 pda_bl_final <- read.csv(here("data","pda_updated_Nov4.csv")) 
 
 pda_bl_final [pda_bl_final == ''] <- NA
@@ -14,7 +13,7 @@ pda_intubated$last_followup_date <- as.Date(pda_intubated$last_followup_date)
 pda_intubated$date.of.birth <- as.Date(pda_intubated$date.of.birth)
 pda_intubated$ref_date <- as.Date(pda_intubated$ref_date)
 
-pda_intubated <- pda_intubated %>% mutate(ref_year=lubridate::year(ref_date)) ##10/1 z:create ref_year (year of referral) to include into models
+pda_intubated <- pda_intubated %>% mutate(ref_year=lubridate::year(ref_date)) 
 pda_intubated$ref_year <- as.numeric(pda_intubated$ref_year)
 pda_intubated <- pda_intubated %>% mutate(ref_days=ref_date - date.of.birth)
 pda_intubated$ref_days <- as.numeric(pda_intubated$ref_days)
@@ -37,9 +36,8 @@ pda_intubated <- pda_intubated %>% mutate(ref_med=case_when(no_courses_tx==0 | i
 pda_intubated <- pda_intubated %>% mutate(surfactant=case_when(surfactant=="Yes" ~ 1,
                                                                TRUE ~0))
 pda_intubated <- pda_intubated %>% mutate(tx_under_2= case_when(no_courses_tx<=2~ 1,
-                                                                no_courses_tx>2 ~0)) #medical treatment course under 2
-
-##Create event variable, where 1 is extubation within follow-up, 2 is lost to follow-up, 3 is death, 4 is administrative censoring       
+                                                                no_courses_tx>2 ~0)) 
+   
 pda_intubated <- pda_intubated %>% 
   mutate(event=case_when(extubation==1 & mv_since_ref <= 45 ~ 1,
                          extubation==0 & mv_since_ref <= 45 ~ 2,
