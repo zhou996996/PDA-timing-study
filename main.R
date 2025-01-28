@@ -62,7 +62,7 @@ sensitivity_analyis2 <- overall_function(.dat=pda_intubated_long,
                                          point_estimate_only=FALSE,
                                          bs_reps=1000)
 
-#sensitivity analysis 3 (actual age <= 14 days)
+#sensitivity analysis 3 (younger vs. older group for actual age <= 14 days)
 .formula_n_e_sensi3 = "intervention==1 ~ ns(age_days, knots=c(17), Boundary.knots=c(15,20))"
 .formula_d_e_sensi3 = "intervention==1 ~ ns(age_days, knots=c(17), Boundary.knots=c(15,20)) + 
                                  ns(ega_ref, knots=c(27), Boundary.knots=c(25,29)) +
