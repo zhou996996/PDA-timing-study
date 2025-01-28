@@ -1,4 +1,4 @@
-##convert to a long format
+#convert to a long format
 pda_intubated_long <- survSplit(Surv(time = mv_since_ref, 
                                      event = extubation
 ) ~ study.id + ega_under_28 + ega_days + ega_ref + age_ref +  ref_days + ref_year + female + gestational.age + weight +  
@@ -10,12 +10,12 @@ data = pda_intubated,
 end="tstop", 
 cut = seq(from=0, to=364, by=1)) 
 
-#create the variable indicating whether or not an individual had the intervention for main analysis
+
 pda_intubated_long <- pda_intubated_long %>% mutate(intervention=case_when(tstart>=intervention_since_ref ~ 1,
                                                                            TRUE ~ 0)) 
 pda_intubated_long <- pda_intubated_long %>% group_by(study.id) %>% mutate(intervention_lag=lag(intervention, n=1, default=0)) %>% ungroup()
 
-###Sensitivity analysis 1
+#Sensitivity analysis 1
 pda_intubated$date_death <- as.Date(pda_intubated$date_death)
 pda_intubated_sensitivity_1 <- pda_intubated %>%
   mutate(last_followup_date = if_else(death == 1, date_death, last_followup_date))
@@ -27,7 +27,7 @@ pda_intubated_sensitivity_1 <- pda_intubated_sensitivity_1 %>% mutate(mv_since_i
 
 pda_intubated_long_sensitivity_1 <- survSplit(Surv(time = mv_since_ref, 
                                      event = extubation
-) ~ study.id + ega_days + ref_year + ega_ref + female + weight + ade_res_day +intervention_since_ref +  # added additional covariates
+) ~ study.id + ega_days + ref_year + ega_ref + female + weight + ade_res_day +intervention_since_ref +  
   ref_med,
 data = pda_intubated_sensitivity_1,
 end="tstop", 
@@ -38,11 +38,11 @@ pda_intubated_long_sensitivity_1 <- pda_intubated_long_sensitivity_1 %>% mutate(
 pda_intubated_long_sensitivity_1 <- pda_intubated_long_sensitivity_1 %>% group_by(study.id) %>% mutate(intervention_lag=lag(intervention, n=1, default=0)) %>% ungroup()
 
 
-###Sensitivity analysis 3
+#Sensitivity analysis 3
 pda_intubated_sensitivity_3 <- pda_intubated %>% filter(ref_days <= 14)
 pda_intubated_long_sensitivity_3 <- survSplit(Surv(time = mv_since_ref, 
                                                    event = extubation
-) ~ study.id + ega_days + ref_year + ref_days + ega_ref + female + weight + ade_res_day +intervention_since_ref +  # added additional covariates
+) ~ study.id + ega_days + ref_year + ref_days + ega_ref + female + weight + ade_res_day +intervention_since_ref +  
   ref_med + referral.center,
 data = pda_intubated_sensitivity_3,
 end="tstop", 
