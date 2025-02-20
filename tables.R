@@ -2,7 +2,7 @@ source("data cleaning.R")
 source("data-reformatting.R")
 source("analysis-function.R")
 
-##Table one & Table two for analysis set
+#unweighted tables
 tempdat <- pda_intubated_long %>% mutate(temp_early = case_when(intervention==1 & intervention_lag==0 & tstart< early_num ~ 1,
                                                                 intervention==0 & extubation==1 & tstart< early_num ~ 1,
                                                                 intervention==0 & ade_res_day < early_num ~ 1,
@@ -18,11 +18,11 @@ tempdat <- pda_intubated_long %>% mutate(temp_early = case_when(intervention==1 
                                           mutate(group="late") %>% select(-c(temp_early, temp_late)))
 
 fac_vars <- c("pda_intervention.type","female","ega_under_28","surfactant","maternal_rfs","inotropes",
-              "ref_med","extubation","event")
+              "ref_med","extubation","event","chd.type","mv_type")
 .dat_for_table1_unweighted <- .dat_for_table1_unweighted %>% mutate_at(fac_vars,factor)
 
 tab1 <- CreateTableOne(data = .dat_for_table1_unweighted,
-                       vars = c("female","gestational.age","ega_ref","weight","ref_year","ref_med"),
+                       vars = c("female","gestational.age","ega_ref","weight","ref_year","ref_med","chd.type"),
                        strata = "group", test = F)
 kableone(tab1,nonnormal=c("gestational.age","weight","ega_ref","ref_year"),contDigits = 1,showAllLevels = TRUE)
 
@@ -37,6 +37,15 @@ tab3 <- CreateTableOne(data = .dat_for_table1_unweighted,
                        strata = "group", test = F)
 kableone(tab3,nonnormal=c("daylife_pda","diameter_duct","peak_syst_velo"),contDigits = 1, showAllLevels = TRUE)
 
+tab4 <- CreateTableOne(data = .dat_for_table1_unweighted,
+                       vars = c("pda_intervention.type","intervention_since_ref","mv_since_ref","daylife_pda","event"),
+                       strata = "group",test = F)
+kableone(tab4,nonnormal=c("intervention_since_ref","mv_since_ref","daylife_pda"),contDigits = 1, showAllLevels = TRUE)
+
+tab5 <- CreateTableOne(data = .dat_for_table1_unweighted,
+                       vars = c("mv_type","pip","peep","paw_measured","fio2"),
+                       strata = "group",test = F)
+kableone(tab5,nonnormal=c("pip","peep","paw_measured","fio2"),contDigits = 1, showAllLevels = TRUE)
 
 ############
 .formula_d_e = "intervention==1 ~ ns(tstart, knots=c(3), Boundary.knots=c(1,4)) + 
@@ -68,17 +77,17 @@ dat2 <- rbind(pda_intubated_long_tables %>% group_by(study.id) %>% filter(sw_ear
 dat2 <- dat2 %>%
   mutate(across(c("gestational.age", "weight", "apgar_1", "apgar_5", "fio2", "map", "rss", "diameter_duct", "w"), as.numeric)) %>%
   mutate(across(c("female", "ega_cat", "bw_cat", "race_ref", "surfactant", "maternal_rfs", "pda_intervention.type", 
-                  "ref_med", "inotropes", "early_group", "event"), as.factor))
+                  "ref_med", "inotropes", "early_group", "event","chd.type"), as.factor))
 
 tab1_w_pre <- svydesign(id = ~ 1,
                         weights = ~ w, 
                         data = dat2)
 
-##create weighted characteristic tables
-tab1_w <- svyCreateTableOne(vars = c("female","gestational.age","ega_ref","weight","ref_year","ref_med"),
+##weighted tables
+tab1_w <- svyCreateTableOne(vars = c("female","gestational.age","ega_ref","weight","ref_year","ref_med","chd.type"),
                             strata = "early_group",
                             data = tab1_w_pre,test=F)
-kableone(tab1_w,nonnormal=c("gestational.age","weight","ega_ref","ref_year"),contDigits = 1)
+kableone(tab1_w,nonnormal=c("gestational.age","weight","ega_ref","ref_year"),contDigits = 1,showAllLevels = T)
 
 tab2_w <- svyCreateTableOne(vars = c("ref_days","apgar_1","apgar_5","race_ref","surfactant","maternal_rfs",
                                      "inotropes"),
@@ -90,5 +99,4 @@ tab3_w <- svyCreateTableOne(data = tab1_w_pre,
                             vars = c("daylife_pda","diameter_duct","peak_syst_velo","ao_doppler_retro","la_dil","lv_dil"),
                             strata = "early_group",test=F)
 kableone(tab3_w,nonnormal=c("daylife_pda","diameter_duct","peak_syst_velo"),contDigits = 1)
-
 
