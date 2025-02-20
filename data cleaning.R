@@ -8,7 +8,6 @@ pda_bl_final [pda_bl_final == ''] <- NA
 names(pda_bl_final) <- tolower(names(pda_bl_final))
 pda_intubated <- pda_bl_final %>% filter(intubated_ref==1)
 
-
 pda_intubated$last_followup_date <- as.Date(pda_intubated$last_followup_date)
 pda_intubated$date.of.birth <- as.Date(pda_intubated$date.of.birth)
 pda_intubated$ref_date <- as.Date(pda_intubated$ref_date)
@@ -34,12 +33,14 @@ pda_intubated <- pda_intubated %>% mutate(female=case_when(sex=="Female" ~ 1,
 pda_intubated <- pda_intubated %>% mutate(ref_med=case_when(no_courses_tx==0 | is.na(no_courses_tx) ~ 0,
                                                             TRUE ~ 1))
 pda_intubated <- pda_intubated %>% mutate(surfactant=case_when(surfactant=="Yes" ~ 1,
-                                                               TRUE ~0))
-pda_intubated <- pda_intubated %>% mutate(tx_under_2= case_when(no_courses_tx<=2~ 1,
-                                                                no_courses_tx>2 ~0)) 
+                                                               TRUE ~0),
+                                          chd.type=case_when(chd.type == "asd" ~ "asd",
+                                                             chd.type == "vsd" ~ "vsd",
+                                                             TRUE ~ "Simple")) 
    
 pda_intubated <- pda_intubated %>% 
   mutate(event=case_when(extubation==1 & mv_since_ref <= 45 ~ 1,
                          extubation==0 & mv_since_ref <= 45 ~ 2,
                          death==1 ~ 3,
                          TRUE ~ 4)) 
+
