@@ -1,19 +1,25 @@
-#convert to a long format
+##convert to a long format
 pda_intubated_long <- survSplit(Surv(time = mv_since_ref, 
                                      event = extubation
 ) ~ study.id + ega_under_28 + ega_days + ega_ref + age_ref +  ref_days + ref_year + female + gestational.age + weight +  
-  apgar_1 + apgar_5 + race_ref + maternal_rfs + tx_under_2 + inotropes +
-  daylife_pda + diameter_duct + length_duct + peak_syst_velo + ao_doppler_retro + la_dil + lv_dil +
-  mv_since_ref + daylife_pda + event + ade_res_day + 
-  surfactant + ref_med + pda_intervention.type + intervention_since_ref + referral.center,
+  apgar_1 + apgar_5 + race_ref + maternal_rfs + inotropes + daylife_pda + diameter_duct + length_duct + peak_syst_velo + ao_doppler_retro + la_dil + lv_dil +
+  mv_since_ref + daylife_pda + event + ade_res_day + surfactant + ref_med + pda_intervention.type + intervention_since_ref + referral.center + chd.type + no_courses_tx + 
+  mv_type + pip + peep + fio2 + paw_measured + rss + osi,
 data = pda_intubated,
 end="tstop", 
 cut = seq(from=0, to=364, by=1)) 
 
-
+#create the variable indicating whether or not an individual had the intervention
 pda_intubated_long <- pda_intubated_long %>% mutate(intervention=case_when(tstart>=intervention_since_ref ~ 1,
-                                                                           TRUE ~ 0)) 
+                                                                           TRUE ~ 0))
 pda_intubated_long <- pda_intubated_long %>% group_by(study.id) %>% mutate(intervention_lag=lag(intervention, n=1, default=0)) %>% ungroup()
+pda_intubated_long <- pda_intubated_long %>% 
+  mutate(sl=case_when(intervention==0 ~ 0,  #for sensitivity analysis 4 - surgical ligation
+                      intervention==1 & pda_intervention.type==1 ~ 1,
+                      TRUE ~0)) %>%
+  mutate(dc=case_when(intervention==0 ~ 0, #for sensitivity analysis 4 - device closure
+                      intervention==1 & pda_intervention.type==2 ~ 1,
+                      TRUE ~0))
 
 #Sensitivity analysis 1
 pda_intubated$date_death <- as.Date(pda_intubated$date_death)
