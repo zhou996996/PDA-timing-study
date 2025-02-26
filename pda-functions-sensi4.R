@@ -1,4 +1,5 @@
-ipw_bootstrap_function_sensi6 <- function(formula_d_e, formula_n_e, formula_d_l, formula_n_l, .dat){
+##### sensitivity analysis 4 (surgical ligation vs. device closure)
+ipw_bootstrap_function_sensi4 <- function(formula_d_e, formula_n_e, formula_d_l, formula_n_l, .dat){
   
   ipw_denominator_sl <- glm(formula = as.formula(formula_d_e), 
                                data = .dat %>% filter(intervention_lag==0 & sl==1),
@@ -47,8 +48,8 @@ ipw_bootstrap_function_sensi6 <- function(formula_d_e, formula_n_e, formula_d_l,
   
   return(.dat)} # this asks the function to give you "dat" once it is done running
 
-#06/23 z: add analysis function for bootstraping
-analysis_function_sensi6 <- function(.dat, 
+
+analysis_function_sensi4 <- function(.dat, 
                               formula_d_e,
                               formula_n_e,
                               formula_d_l,
@@ -69,11 +70,11 @@ analysis_function_sensi6 <- function(.dat,
     .dat <- .dat %>% mutate(Freq=1)
   }
   
-  .dat <- ipw_bootstrap_function_sensi6(
-    formula_d_e=.formula_d_e,
-    formula_n_e=.formula_n_e,
-    formula_d_l=.formula_d_l,
-    formula_n_l=.formula_n_l, 
+  .dat <- ipw_bootstrap_function_sensi4(
+    formula_d_e=.formula_d_e_sensi4,
+    formula_n_e=.formula_n_e_sensi4,
+    formula_d_l=.formula_d_l_sensi4,
+    formula_n_l=.formula_n_l_sensi4, 
     .dat=.dat)
   
   if(dataset_for_tables){ ### 9/11: am: added this option for tables
@@ -81,12 +82,12 @@ analysis_function_sensi6 <- function(.dat,
   }
   
   #outcome models
-  pooled_ipw_sl <- glm(formula = as.formula(.formula_outcome), 
+  pooled_ipw_sl <- glm(formula = as.formula(.formula_outcome_sensi4), 
                           data=.dat, 
                           family=quasibinomial(),
-                          weights=sw_sl_prod*Freq) #### look at this line/step and same in line 106 to understand why all bootstrap resample values were the same previously
+                          weights=sw_sl_prod*Freq) 
   
-  pooled_ipw_dc <- glm(formula = as.formula(.formula_outcome),    
+  pooled_ipw_dc <- glm(formula = as.formula(.formula_outcome_sensi4),    
                          data=.dat, 
                          family=quasibinomial(),
                          weights=sw_dc_prod*Freq) 
@@ -102,10 +103,10 @@ analysis_function_sensi6 <- function(.dat,
                         dc= 1- cumprod(p_dc)) %>%
     mutate(rd=sl - dc) %>% mutate(rr=sl/dc) %>%
     mutate(across(everything(), ~ round(., 4)))
-  return(results) ### am: 6/24, kept as data.frame instead of kable for post-processing in a different step
+  return(results) 
 }
 
-overall_function_sensi6 <- function(.dat,    #9/8 z: should it be uniformed to dat rather than .dat, because for analysis_function it's dat?
+overall_function_sensi4 <- function(.dat,    
                              formula_d_e,
                              formula_n_e,
                              formula_d_l,
@@ -118,23 +119,23 @@ overall_function_sensi6 <- function(.dat,    #9/8 z: should it be uniformed to d
   
   if(point_estimate_only){
     # point estimate
-    results_point <- analysis_function_sensi6(.dat=.dat, formula_d_e=.formula_d_e, 
-                                       formula_n_e=.formula_n_e, 
-                                       formula_d_l=.formula_d_l,
-                                       formula_n_l=.formula_n_l,
-                                       formula_outcome=.formula_outcome, 
+    results_point <- analysis_function_sensi4(.dat=.dat, formula_d_e=.formula_d_e_sensi4, 
+                                       formula_n_e=.formula_n_e_sensi4, 
+                                       formula_d_l=.formula_d_l_sensi4,
+                                       formula_n_l=.formula_n_l_sensi4,
+                                       formula_outcome=.formula_outcome_sensi4, 
                                        bootstrap=FALSE, bs_num=0, ...) 
     return(results_point)
   } else if(!point_estimate_only){
     # bootstrap resampling estimates
     bs_results_all <- pblapply(setNames(0:bs_reps, 0:bs_reps), function(x){   
       set.seed(x) ## for reproducibility
-      analysis_function_sensi6(.dat=.dat, 
-                        formula_d_e=.formula_d_e,
-                        formula_n_e=.formula_n_e,
-                        formula_d_l=.formula_d_l,
-                        formula_n_l=.formula_n_l,
-                        formula_outcome=.formula_outcome,
+      analysis_function_sensi4(.dat=.dat, 
+                        formula_d_e=.formula_d_e_sensi4,
+                        formula_n_e=.formula_n_e_sensi4,
+                        formula_d_l=.formula_d_l_sensi4,
+                        formula_n_l=.formula_n_l_sensi4,
+                        formula_outcome=.formula_outcome_sensi4,
                         bootstrap=TRUE, 
                         bs_num=x)
     })
