@@ -2,7 +2,6 @@ source("data cleaning.R")
 source("data-reformatting.R")
 source("analysis-function.R")
 source("analysis-function-sensi3.R")
-source("analysis-function-sensi4.R")
 
 #for main analysis
 .formula_d_e = "intervention==1 ~ ns(tstart, knots=c(3), Boundary.knots=c(1,4)) + 
