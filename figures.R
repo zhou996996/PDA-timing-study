@@ -264,8 +264,8 @@ fig5b <- ggplot(sensitivity_analysis3, aes(x = day, y = rd)) +
 
 fig_s3 <- grid.arrange(fig5a, fig5b, ncol = 2)
 
-#fig8a-b:sensitivity analysis for surgical ligation vs. device closure
-result_com <- sensitivity_analysis6 %>% mutate(sl_ci=sl) %>% mutate(dc_ci=dc)
+#fig6a-b:sensitivity analysis for surgical ligation vs. device closure
+result_com <- sensitivity_analysis4 %>% mutate(sl_ci=sl) %>% mutate(dc_ci=dc)
 result_long <- result_com %>%
   pivot_longer(
     cols = c(sl, sl_ci, sl_l, sl_u, dc, dc_ci, dc_l, dc_u),
@@ -276,7 +276,7 @@ result_long <- result_com %>%
                                "sl" = "Surgical ligation", 
                                "dc" = "Device closure"))
 
-fig8a <- ggplot(result_long, aes(x = day, y = ci, color = intervention)) +
+fig6a <- ggplot(result_long, aes(x = day, y = ci, color = intervention)) +
   geom_ribbon(aes(ymin = l, ymax = u, fill = intervention), alpha = 0.2, color = NA) + 
   geom_line(size = 0.8) +
   labs(x = "Days since Referral", y = "Cumulative incidence", color = "Intervention",tag = "A") +
@@ -307,7 +307,7 @@ fig8a <- ggplot(result_long, aes(x = day, y = ci, color = intervention)) +
   scale_color_jama()+
   scale_fill_jama()
 
-fig8b <- ggplot(sensitivity_analysis6, aes(x = day, y = rd)) +
+fig6b <- ggplot(sensitivity_analysis4, aes(x = day, y = rd)) +
   geom_ribbon(aes(ymin = rd_l, ymax = rd_u), alpha = 0.2, fill = "lightblue") + 
   geom_line(size = 0.8) +
   labs(x = "Days since Referral",y = "Risk Difference",tag = "B") +
@@ -328,4 +328,4 @@ fig8b <- ggplot(sensitivity_analysis6, aes(x = day, y = rd)) +
   scale_y_continuous(limits = c(-1, 1), expand = c(0, 0)) +  
   geom_hline(yintercept = 0, linetype = "dotted", color = "black") 
 
-fig_s6 <- grid.arrange(fig8a, fig8b, ncol = 2)
+fig_s4 <- grid.arrange(fig6a, fig6b, ncol = 2)
